@@ -56,6 +56,7 @@ sudo nginx -t
 sudo systemctl restart nginx
 
 # Step 13: Access Your Combined Application
+http://<ip>/
 http://<ip>/api/predict?text=I%20am%20happy
 
 ```

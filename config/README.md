@@ -2,45 +2,53 @@
 
 ```bash
 # Step 1: Access Your DigitalOcean Droplet
-ssh <your-username>@<your-droplet-ip>
+ssh root@<your-droplet-ip> -i msa-key
 
 # Step 2: Install Required Software
 sudo apt update
-sudo apt install git nodejs npm python3 python3-pip
+sudo apt install git python3 python3-pip
+
+# Install Nodejs 18
+sudo apt-get install -y ca-certificates curl gnupg
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+NODE_MAJOR=18
+echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+
+sudo apt-get update
+sudo apt-get install nodejs -y
+node -v
 
 # Step 3: Clone Your React App Repository
-cd ~
-git clone <react-repo-url>
+cd /opt/
+git clone https://github.com/Oddadmix/msa-hands-on-deployment-session-1.git
 
 # Step 4: Set Up and Build Your React App
-cd <your-react-app-directory>
+cd /opt/msa-hands-on-deployment-session-1/ui
 npm install
 npm run build
 
-# Step 5: Clone Your Python API Repository
-cd ~
-git clone <python-api-repo-url>
-
-# Step 6: Install Python API Dependencies
-cd <your-python-api-directory>
-pip3 install -r <requirements-file>
+# Step 5: Configure Your Python API
+cd /opt/msa-hands-on-deployment-session-1/api
+pip3 install -r requirements.txt
 
 # Step 7: Install PM2
 sudo npm install -g pm2
 
 # Step 8: Start Your Python API with PM2
-pm2 start app.py --name <python-api-name>
+pm2 start main.py --name api --interpreter python3
 
-# Step 9: Start Your React App with PM2
-cd <your-react-app-directory>
-pm2 start npm --name <react-app-name> -- start
+pm2 list
 
-# Step 10: Configure PM2 Startup on Server Boot
+# Step 09: Configure PM2 Startup on Server Boot
 pm2 startup systemd
-sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u your-username --hp /home/your-username
+
+# Step 10: Install Nginx
+sudo apt install nginx
 
 # Step 11: Configure Nginx to Proxy Requests to React and Python API
-sudo nano /etc/nginx/sites-available/<your-domain>
+cd /etc/nginx/conf.d/
+cp /opt/msa-hands-on-deployment-session-1/config/nginx.conf .
 # Add Nginx configuration (see previous response for details)
 
 # Step 12: Test Nginx Configuration and Restart Nginx
@@ -48,18 +56,6 @@ sudo nginx -t
 sudo systemctl restart nginx
 
 # Step 13: Access Your Combined Application
-# Access your app using a web browser:
-# If you're using a domain name:
-# http://<your-domain>/
-# If you're using the droplet's IP address:
-# http://<your-droplet-ip>/
+http://<ip>/api/predict?text=I%20am%20happy
 
-# Step 14: Monitor Your Applications with PM2 (Optional)
-# View running apps: pm2 list
-# View app details: pm2 show <app-name>
-# View app logs: pm2 logs <app-name>
-# Stop app: pm2 stop <app-name>
-# Restart app: pm2 restart <app-name>
 ```
-
-This guide covers the entire deployment process for both the React frontend and the Python API, including setting up dependencies, starting applications with PM2, configuring Nginx for reverse proxy, and testing your deployment. Make sure to replace placeholders like `<your-username>`, `<your-droplet-ip>`, `<react-repo-url>`, `<your-react-app-directory>`, `<python-api-repo-url>`, `<your-python-api-directory>`, `<requirements-file>`, `<python-api-name>`, `<react-app-name>`, `<your-domain>`, `<react-app-port>`, and `<python-api-port>` with your actual values and directory paths as needed for your specific setup.

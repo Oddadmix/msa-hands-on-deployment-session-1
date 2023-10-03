@@ -49,6 +49,7 @@ sudo apt install nginx
 # Step 11: Configure Nginx to Proxy Requests to React and Python API
 cd /etc/nginx/conf.d/
 cp /opt/msa-hands-on-deployment-session-1/config/nginx.conf .
+sed -i 's@<ip-address>@YOURIP@g' nginx.conf
 # Add Nginx configuration (see previous response for details)
 
 # Step 12: Test Nginx Configuration and Restart Nginx
